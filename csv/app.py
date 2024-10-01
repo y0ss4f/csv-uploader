@@ -7,7 +7,7 @@ import sqlite3
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 
-# Database setup
+
 DATABASE = 'data.db'
 
 def init_db():
