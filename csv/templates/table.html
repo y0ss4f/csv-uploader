@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable CSV Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        // Function to make cells editable
+        function makeEditable() {
+            var cells = document.querySelectorAll("td");
+            cells.forEach(function(cell) {
+                cell.setAttribute("contenteditable", "true");
+                cell.style.border = "1px solid #000";
+            });
+            document.getElementById("saveBtn").disabled = false; // Enable the save button
+        }
+
+        // Function to collect data from the table and send it for saving
+        function saveTable() {
+            var table = document.getElementById("dataTable");
+            var rows = table.rows;
+            var data = [];
+            for (var i = 0; i < rows.length; i++) { // Start from row 0 to include headers
+                var row = [];
+                for (var j = 0; j < rows[i].cells.length; j++) {
+                    row.push(rows[i].cells[j].innerText);
+                }
+                data.push(row);
+            }
+
+            fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({data: data}),
+            }).then(response => {
+                if (response.ok) {
+                    alert('Table data saved successfully!');
+                } else {
+                    response.text().then(text => {
+                        alert('Failed to save table data: ' + text);
+                    });
+                }
+            });
+        }
+
+        // Function to filter table rows
+        function filterTable() {
+            const filter = document.getElementById("filterInput").value.toLowerCase();
+            const rows = document.querySelectorAll("#dataTable tbody tr");
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                let rowVisible = Array.from(cells).some(cell => cell.textContent.toLowerCase().includes(filter));
+                row.style.display = rowVisible ? "" : "none"; // Show or hide the row
+            });
+        }
+
+        // Function to sort the table by a column index
+        function sortTable(columnIndex) {
+            const table = document.getElementById("dataTable");
+            const rows = Array.from(table.rows).slice(1); // Exclude the header row
+            const isAscending = table.getAttribute('data-order') === 'asc'; // Toggle sort order
+
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].innerText.toLowerCase();
+                const cellB = b.cells[columnIndex].innerText.toLowerCase();
+
+                return (cellA < cellB ? -1 : 1) * (isAscending ? 1 : -1);
+            });
+
+            // Remove existing rows and re-add sorted rows
+            rows.forEach(row => table.appendChild(row));
+            table.setAttribute('data-order', isAscending ? 'desc' : 'asc'); // Update order attribute
+        }
+
+        // Add table ID and click event listeners after the table is rendered
+        window.onload = function() {
+            const table = document.querySelector('table');
+            table.setAttribute('id', 'dataTable');
+
+            // Add filter input
+            const filterInput = document.createElement('input');
+            filterInput.setAttribute('id', 'filterInput');
+            filterInput.setAttribute('placeholder', 'Search...');
+            filterInput.setAttribute('onkeyup', 'filterTable()');
+            filterInput.className = 'form-control mb-3'; // Add Bootstrap styling
+            document.querySelector('.container').insertBefore(filterInput, document.querySelector('.container > div'));
+
+            // Add click events to headers for sorting
+            const headers = table.querySelectorAll("th");
+            headers.forEach((header, index) => {
+                header.onclick = () => sortTable(index); // Add click event to header
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Data</h1>
+        <a href="/">Go Back</a>
+        <button class="btn btn-primary" onclick="makeEditable()">Edit Table</button>
+        <button class="btn btn-success" id="saveBtn" onclick="saveTable()" disabled>Save Changes</button>
+        <button id="exportData" class="btn btn-secondary" onclick="window.location.href='/export'">Export Data</button>
+        <div>
+            {{ tables|safe }}
+        </div>
+    </div>
+</body>
+</html>
