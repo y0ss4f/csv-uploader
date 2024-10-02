@@ -48,4 +48,3 @@ This project is a web-based application that allows users to upload, view, edit,
 
 ---
 
-This version organizes the content with clearer headings and spacing for better readability.
