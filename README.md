@@ -1,8 +1,8 @@
-CSV Table Management Web Application
+**CSV Table Management Web Application**<br>
 **Project Overview:**
  This project is a web-based application that allows users to upload, view, edit, save, and export CSV data in a user-friendly interface. It is built with Python (Flask) as the backend, a SQLite database for   data storage, and a frontend powered by HTML, JavaScript, and Bootstrap for responsiveness. The application ensures seamless interaction with CSV files, making it easier to manage data in real-time.
 
-Features:
+**Features:**
  CSV Upload: Users can upload CSV files to the application.
  Data Display: The uploaded CSV data is displayed in a responsive table format.
  Editability: The table cells can be edited directly in the browser.
